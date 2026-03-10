@@ -1,0 +1,7 @@
+data/
+runs/
+runs_h200/
+runs_smoke/
+runs_osv5m/
+*.pyc
+__pycache__/
