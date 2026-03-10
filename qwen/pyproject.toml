@@ -1,0 +1,32 @@
+[project]
+name = "qwen-geo"
+version = "0.1.0"
+description = "Autonomous photo geolocation fine-tuning loop for Qwen 3.5 2B with Unsloth"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate",
+    "datasets",
+    "numpy",
+    "pandas",
+    "peft",
+    "pillow",
+    "reverse_geocoder",
+    "torch",
+    "transformers",
+    "trl",
+    "unsloth",
+]
+
+[project.scripts]
+qwen-geo = "qwen_geo.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

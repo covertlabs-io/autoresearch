@@ -1,0 +1,5 @@
+data/
+runs/
+runs_osv5m/
+*.pyc
+__pycache__/
