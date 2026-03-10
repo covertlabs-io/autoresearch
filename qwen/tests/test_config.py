@@ -11,6 +11,12 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(config.label_style, "full_json")
         self.assertIn(576, config.search.image_sizes)
 
+    def test_paths_resolve_from_project_root(self) -> None:
+        config_path = Path("configs/smoke_local.toml").resolve()
+        config = load_config(config_path)
+        self.assertTrue(str(config.output_root(config_path)).endswith("/qwen/runs_smoke"))
+        self.assertTrue(str(config.prepared_data_path(config_path)).endswith("/qwen/data/prepared_smoke"))
+
 
 if __name__ == "__main__":
     unittest.main()

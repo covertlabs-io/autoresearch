@@ -1,41 +1,36 @@
 [project]
-name = "qwen-geo-osv5m"
-output_root = "runs_osv5m"
-tracker_db = "runs_osv5m/experiments.sqlite"
-prepared_data_dir = "data/prepared_osv5m"
-reports_dir = "runs_osv5m/reports"
+name = "qwen-geo-geoguessr-h200"
+output_root = "runs_h200"
+tracker_db = "runs_h200/experiments.sqlite"
+prepared_data_dir = "data/prepared_h200"
+reports_dir = "runs_h200/reports"
 seed = 17
 
 [dataset]
-name = "osv5m/osv5m"
+name = "marcelomoreno26/geoguessr"
 train_split = "train"
-eval_split = "validation"
-test_split = "test"
 image_column = "image"
-latitude_column = "latitude"
-longitude_column = "longitude"
-country_column = "country"
-sample_limit = 50000
-train_limit = 8192
+sample_limit = 24000
+train_limit = 12288
 eval_limit = 512
 test_limit = 512
 split_seed = 17
-eval_fraction = 0.05
-test_fraction = 0.01
+eval_fraction = 0.08
+test_fraction = 0.02
 geohash_precision = 4
 
 [model]
 backend = "unsloth"
 name = "unsloth/Qwen3.5-2B-Base"
-max_seq_length = 1536
+max_seq_length = 2048
 load_in_4bit = false
 use_gradient_checkpointing = true
-max_image_size = 576
+max_image_size = 672
 trust_remote_code = true
 
 [lora]
-r = 16
-alpha = 16
+r = 32
+alpha = 32
 dropout = 0.0
 bias = "none"
 finetune_vision_layers = true
@@ -44,25 +39,25 @@ finetune_attention_modules = true
 finetune_mlp_modules = true
 
 [training]
-per_device_train_batch_size = 1
-gradient_accumulation_steps = 8
+per_device_train_batch_size = 2
+gradient_accumulation_steps = 16
 learning_rate = 0.0002
 weight_decay = 0.01
 warmup_ratio = 0.05
-max_steps = 220
+max_steps = 300
 num_train_epochs = 1.0
-time_budget_minutes = 25
+time_budget_minutes = 30
 logging_steps = 10
-save_steps = 220
+save_steps = 300
 max_grad_norm = 1.0
 lr_scheduler_type = "cosine"
 num_proc = 1
 bf16 = true
 gradient_checkpointing = true
-dataloader_num_workers = 2
+dataloader_num_workers = 4
 
 [evaluation]
-eval_examples = 192
+eval_examples = 256
 max_new_tokens = 80
 temperature = 0.0
 top_p = 1.0
@@ -77,10 +72,10 @@ planner_seed = 17
 
 [search]
 learning_rates = [0.0001, 0.0002, 0.0003]
-lora_ranks = [8, 16, 32]
+lora_ranks = [16, 32, 64]
 geohash_precisions = [3, 4, 5]
-train_limits = [4096, 8192, 16384]
-image_sizes = [448, 576, 672]
+train_limits = [6144, 12288, 16384]
+image_sizes = [576, 672, 768]
 label_styles = ["full_json", "cell_json", "coords_json"]
 prompt_styles = ["strict_json", "geohash_first", "coords_first"]
 finetune_vision_layers = [true, false]

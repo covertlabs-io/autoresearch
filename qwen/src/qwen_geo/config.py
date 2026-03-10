@@ -52,6 +52,7 @@ class DatasetConfig:
 
 @dataclass
 class ModelConfig:
+    backend: str = "unsloth"
     name: str = "unsloth/Qwen3.5-2B-Base"
     max_seq_length: int = 1536
     load_in_4bit: bool = False
@@ -143,21 +144,27 @@ class ExperimentConfig:
         return json.dumps(self.to_dict(), indent=2, sort_keys=True)
 
     def output_root(self, config_path: Path) -> Path:
-        return resolve_path(config_path.parent, self.project.output_root)
+        return resolve_path(project_root(config_path), self.project.output_root)
 
     def tracker_path(self, config_path: Path) -> Path:
-        return resolve_path(config_path.parent, self.project.tracker_db)
+        return resolve_path(project_root(config_path), self.project.tracker_db)
 
     def prepared_data_path(self, config_path: Path) -> Path:
-        return resolve_path(config_path.parent, self.project.prepared_data_dir)
+        return resolve_path(project_root(config_path), self.project.prepared_data_dir)
 
     def reports_path(self, config_path: Path) -> Path:
-        return resolve_path(config_path.parent, self.project.reports_dir)
+        return resolve_path(project_root(config_path), self.project.reports_dir)
 
 
 def resolve_path(base_dir: Path, value: str) -> Path:
     path = Path(value)
     return path if path.is_absolute() else (base_dir / path).resolve()
+
+
+def project_root(config_path: Path) -> Path:
+    if config_path.parent.name == "configs":
+        return config_path.parent.parent.resolve()
+    return config_path.parent.resolve()
 
 
 def _construct(section_cls: type[Any], payload: dict[str, Any] | None) -> Any:

@@ -1,0 +1,83 @@
+[project]
+name = "qwen-geo-smoke"
+output_root = "runs_smoke"
+tracker_db = "runs_smoke/experiments.sqlite"
+prepared_data_dir = "data/prepared_smoke"
+reports_dir = "runs_smoke/reports"
+seed = 17
+
+[dataset]
+name = "synthetic://geolocation-smoke"
+train_split = "train"
+train_limit = 48
+eval_limit = 16
+test_limit = 16
+split_seed = 17
+eval_fraction = 0.2
+test_fraction = 0.1
+geohash_precision = 4
+
+[model]
+backend = "smoke"
+name = "local-smoke-model"
+max_seq_length = 256
+load_in_4bit = false
+use_gradient_checkpointing = false
+max_image_size = 128
+trust_remote_code = false
+
+[lora]
+r = 8
+alpha = 8
+dropout = 0.0
+bias = "none"
+finetune_vision_layers = true
+finetune_language_layers = true
+finetune_attention_modules = false
+finetune_mlp_modules = false
+
+[training]
+per_device_train_batch_size = 1
+gradient_accumulation_steps = 1
+learning_rate = 0.0002
+weight_decay = 0.0
+warmup_ratio = 0.0
+max_steps = 10
+num_train_epochs = 1.0
+time_budget_minutes = 1
+logging_steps = 1
+save_steps = 10
+max_grad_norm = 1.0
+lr_scheduler_type = "constant"
+num_proc = 1
+bf16 = false
+gradient_checkpointing = false
+dataloader_num_workers = 0
+
+[evaluation]
+eval_examples = 16
+max_new_tokens = 40
+temperature = 0.0
+top_p = 1.0
+thresholds_km = [1, 25, 200, 750]
+
+[autonomy]
+hours = 0.05
+max_trials = 4
+min_score_delta = 0.0
+promote_threshold = 0.0
+planner_seed = 17
+
+[search]
+learning_rates = [0.0001, 0.0002, 0.0003]
+lora_ranks = [4, 8, 16]
+geohash_precisions = [3, 4, 5]
+train_limits = [16, 32, 48]
+image_sizes = [64, 96, 128]
+label_styles = ["full_json", "cell_json", "coords_json"]
+prompt_styles = ["strict_json", "geohash_first", "coords_first"]
+finetune_vision_layers = [true, false]
+finetune_language_layers = [true, false]
+
+label_style = "full_json"
+prompt_style = "strict_json"

@@ -26,6 +26,7 @@ def command_prepare_data(args: argparse.Namespace) -> None:
 def command_run_experiment(args: argparse.Namespace) -> None:
     from qwen_geo.data import limit_split, load_prepared_dataset, prepare_dataset
     from qwen_geo.evaluation import evaluate_model
+    from qwen_geo.smoke import evaluate_smoke_model, train_smoke_experiment
     from qwen_geo.training import train_experiment
 
     config_path = Path(args.config).resolve()
@@ -36,21 +37,25 @@ def command_run_experiment(args: argparse.Namespace) -> None:
     dump_json(run_dir / "resolved_config.json", config.to_dict())
 
     prepared_path = prepare_dataset(config, config.prepared_data_path(config_path))
-    model, processor, train_summary = train_experiment(config, prepared_path, run_dir)
-
-    from unsloth import FastVisionModel
-
-    FastVisionModel.for_inference(model)
     dataset_dict = load_prepared_dataset(prepared_path)
     eval_split = limit_split(dataset_dict["eval"], config.evaluation.eval_examples)
-    metrics = evaluate_model(
-        model,
-        processor,
-        eval_split,
-        config.evaluation,
-        prompt_style=config.prompt_style,
-        run_dir=run_dir,
-    )
+
+    if config.model.backend == "smoke":
+        model, processor, train_summary = train_smoke_experiment(config, prepared_path, run_dir)
+        metrics = evaluate_smoke_model(model, eval_split, config, run_dir)
+    else:
+        model, processor, train_summary = train_experiment(config, prepared_path, run_dir)
+        from unsloth import FastVisionModel
+
+        FastVisionModel.for_inference(model)
+        metrics = evaluate_model(
+            model,
+            processor,
+            eval_split,
+            config.evaluation,
+            prompt_style=config.prompt_style,
+            run_dir=run_dir,
+        )
     combined = {**train_summary, **metrics}
     dump_json(run_dir / "experiment_summary.json", combined)
     print(json.dumps(combined, indent=2, sort_keys=True))

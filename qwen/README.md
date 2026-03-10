@@ -75,7 +75,9 @@ The loop computes a composite `judge_score` and promotes only runs that beat the
 qwen/
 ├── configs/
 │   ├── geoguessr_baseline.toml
-│   └── osv5m_large.toml
+│   ├── geoguessr_h200.toml
+│   ├── osv5m_large.toml
+│   └── smoke_local.toml
 ├── src/qwen_geo/
 │   ├── agents.py
 │   ├── cli.py
@@ -84,8 +86,10 @@ qwen/
 │   ├── evaluation.py
 │   ├── geo.py
 │   ├── prompts.py
+│   ├── smoke.py
 │   └── training.py
 ├── tests/
+│   ├── test_config.py
 │   ├── test_geo.py
 │   └── test_parse.py
 └── pyproject.toml
@@ -100,6 +104,18 @@ uv sync
 ```
 
 ## Typical usage
+
+### 0) Local smoke validation
+
+If you want to validate the full control loop on a machine without GPU/Unsloth, use the smoke config first:
+
+```bash
+PYTHONPATH=src python3 -m qwen_geo.cli prepare-data --config configs/smoke_local.toml
+PYTHONPATH=src python3 -m qwen_geo.cli run-experiment --config configs/smoke_local.toml --run-dir runs_smoke/manual_trial
+PYTHONPATH=src python3 -m qwen_geo.cli run-loop --config configs/smoke_local.toml --hours 0.02 --max-trials 2
+```
+
+This runs the same planner/executor/judge/tracker workflow on a tiny synthetic geolocation dataset and a standard-library smoke backend, which is useful for validating the orchestration before moving to a real GPU.
 
 ### 1) Prepare the dataset cache
 
@@ -130,9 +146,9 @@ Outputs include:
 
 ```bash
 uv run qwen-geo run-loop \
-  --config configs/geoguessr_baseline.toml \
+  --config configs/geoguessr_h200.toml \
   --hours 12 \
-  --max-trials 36
+  --max-trials 24
 ```
 
 The loop will:
@@ -147,8 +163,10 @@ The loop will:
 
 ## Practical notes
 
+- `configs/smoke_local.toml` is the fully local validation path. It does not require CUDA and is intended for end-to-end orchestration testing.
 - Unsloth vision fine-tuning APIs change quickly; this implementation uses the current `FastVisionModel` + `UnslothVisionDataCollator` pattern.
 - For Qwen 3.5, **bf16 LoRA is preferred**. The config leaves `load_in_4bit = false` by default.
+- `configs/geoguessr_h200.toml` is the recommended starting point for the target **H200** environment. It uses a larger train subset, larger image size, bigger LoRA rank, and more aggressive batch accumulation than the baseline config.
 - If the default dataset is too small or noisy for your GPU budget, switch to the `osv5m_large.toml` config and shorten per-trial budgets during exploration.
 - The planner is deliberately simple and local-search oriented. It is meant to run unattended and accumulate evidence, not to perform deep global optimization in one shot.
 

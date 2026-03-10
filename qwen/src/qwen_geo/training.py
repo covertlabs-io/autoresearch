@@ -5,7 +5,11 @@ import time
 from pathlib import Path
 from typing import Any
 
-from transformers import TrainerCallback
+try:
+    from transformers import TrainerCallback
+except ImportError:  # pragma: no cover - local smoke mode can run without transformers
+    class TrainerCallback:  # type: ignore[no-redef]
+        pass
 
 from qwen_geo.config import ExperimentConfig, dump_json
 from qwen_geo.data import GeoChatDataset, limit_split, load_prepared_dataset

@@ -20,6 +20,7 @@ test_fraction = 0.02
 geohash_precision = 4
 
 [model]
+backend = "unsloth"
 name = "unsloth/Qwen3.5-2B-Base"
 max_seq_length = 1536
 load_in_4bit = false
